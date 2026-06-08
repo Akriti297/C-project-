@@ -112,26 +112,137 @@ void draw_triangle(int x, int y, int height)
 {
     int i;
 
-    // left side
+    
     for(i = 0; i < height; i++)
         put_dot(y + i, x - i);
 
-    // right side
+    
     for(i = 0; i < height; i++)
         put_dot(y + i, x + i);
 
-    // base
+    
     for(i = x - height + 1; i <= x + height - 1; i++)
         put_dot(y + height - 1, i);
 }
+void draw_circle(int x, int y, int radius)
+{
+    int r, c;
+    int r2 = radius * radius;
 
+    for(r = y - radius; r <= y + radius; r++)
+    {
+        for(c = x - radius; c <= x + radius; c++)
+        {
+            int dx = c - x;
+            int dy = r - y;
 
+            if(dx * dx + dy * dy <= r2)
+            {
+                put_dot(r, c);
+            }
+        }
+    }
+}
+
+void redraw_shapes(void)
+{
+    int i;
+
+    for(i = 0; i < total; i++)
+    {
+        if(shapes[i].alive == 1)
+        {
+            if(shapes[i].type == RECTANGLE)
+            {
+                draw_rectangle(
+                    shapes[i].x,
+                    shapes[i].y,
+                    shapes[i].a,
+                    shapes[i].b
+                );
+            }
+
+            else if(shapes[i].type == LINE)
+            {
+                draw_line(
+                    shapes[i].x,
+                    shapes[i].y,
+                    shapes[i].a,
+                    shapes[i].b
+                );
+            }
+
+            else if(shapes[i].type == CIRCLE)
+            {
+                draw_circle(
+                    shapes[i].x,
+                    shapes[i].y,
+                    shapes[i].a
+                );
+            }
+
+            else if(shapes[i].type == TRIANGLE)
+            {
+                draw_triangle(
+                    shapes[i].x,
+                    shapes[i].y,
+                    shapes[i].a
+                );
+            }
+        }
+    }
+}
 int main(void)
 {
     clear_canvas();
     draw_rectangle(10,5,20,8);
     draw_line(5, 15, 25, 15);
     draw_triangle(55, 8, 6);
+    draw_circle(25, 18, 5);
+    
+shapes[0].type = RECTANGLE;
+shapes[0].alive = 0;
+shapes[0].x = 10;
+shapes[0].y = 5;
+shapes[0].a = 20;
+shapes[0].b = 8;
+
+shapes[1].type = LINE;
+shapes[1].alive = 1;
+shapes[1].x = 5;
+shapes[1].y = 15;
+shapes[1].a = 25;
+shapes[1].b = 15;
+
+    draw_line(5, 15, 25, 15);
+
+shapes[2].type = LINE;
+shapes[2].alive = 1;
+shapes[2].x = 40;
+shapes[2].y = 5;
+shapes[2].a = 40;
+shapes[2].b = 18;
+
+    draw_line(40,5,40,18);
+
+shapes[3].type = TRIANGLE;
+shapes[3].alive = 1;
+shapes[3].x = 55;
+shapes[3].y = 8;
+shapes[3].a = 6;
+
+    draw_triangle(55, 8, 6);
+
+shapes[4].type = CIRCLE;
+shapes[4].alive = 1;
+shapes[4].x = 25;
+shapes[4].y = 18;
+shapes[4].a = 5;
+
+    draw_circle(25, 18, 5);
+total = 5;
+
+    redraw_shapes();
     show_canvas();
 
     return 0;
