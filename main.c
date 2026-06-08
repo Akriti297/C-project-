@@ -23,12 +23,10 @@ struct Shape {
     int a, b;     
 };
  
-
 char         canvas[ROWS][COLS];      
 struct Shape shapes[MAX];             
 int          total   = 0;            
 int          next_id = 1;            
-
 
 void clear_canvas(void)
 {
@@ -37,7 +35,6 @@ void clear_canvas(void)
         for (c = 0; c < COLS; c++)
             canvas[r][c] = BLANK;
 }
- 
 
 void show_canvas(void)
 {
