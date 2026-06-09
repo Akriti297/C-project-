@@ -1,6 +1,6 @@
-
 #include <stdio.h>
 #include <stdlib.h>
+ 
 
 #define ROWS    25     
 #define COLS    70    
@@ -15,6 +15,7 @@
 #define TRIANGLE  4
  
 
+
 struct Shape {
     int id;       
     int type;     
@@ -23,10 +24,12 @@ struct Shape {
     int a, b;     
 };
  
+
 char         canvas[ROWS][COLS];      
 struct Shape shapes[MAX];             
-int          total   = 0;            
+int          total   = 0;             
 int          next_id = 1;            
+ 
 
 void clear_canvas(void)
 {
@@ -35,17 +38,18 @@ void clear_canvas(void)
         for (c = 0; c < COLS; c++)
             canvas[r][c] = BLANK;
 }
+ 
 
 void show_canvas(void)
 {
     int r, c;
  
-    /* top border */
+    
     printf("+");
     for (c = 0; c < COLS; c++) printf("-");
     printf("+\n");
  
-    /* each row */
+    
     for (r = 0; r < ROWS; r++) {
         printf("|");
         for (c = 0; c < COLS; c++)
@@ -53,45 +57,49 @@ void show_canvas(void)
         printf("|\n");
     }
  
-    /* bottom border */
+    
     printf("+");
     for (c = 0; c < COLS; c++) printf("-");
     printf("+\n");
 }
  
-//puts dots i.e, '*' on the canvas (or) replaces '_' with '*'
+
 void put_dot(int row, int col)
 {
     if (row >= 0 && row < ROWS && col >= 0 && col < COLS)
         canvas[row][col] = DOT;
 }
  
-// removes the dots from the canvas (or) replaces '*' with '_'
+
 void remove_dot(int row, int col)
 {
     if (row >= 0 && row < ROWS && col >= 0 && col < COLS)
         canvas[row][col] = BLANK;
 }
+
+
 void draw_rectangle(int x, int y, int width, int height)
 {
     int i;
 
-    // top side
+    
     for(i = x; i < x + width; i++)
         put_dot(y, i);
 
-    // bottom side
+    
     for(i = x; i < x + width; i++)
         put_dot(y + height - 1, i);
 
-    // left side
+    
     for(i = y; i < y + height; i++)
         put_dot(i, x);
 
-    // right side
+    
     for(i = y; i < y + height; i++)
         put_dot(i, x + width - 1);
 }
+
+
 void draw_line(int x1, int y1, int x2, int y2)
 {
     int i;
@@ -108,6 +116,8 @@ void draw_line(int x1, int y1, int x2, int y2)
             put_dot(i, x1);
     }
 }
+
+
 void draw_triangle(int x, int y, int height)
 {
     int i;
@@ -124,21 +134,24 @@ void draw_triangle(int x, int y, int height)
     for(i = x - height + 1; i <= x + height - 1; i++)
         put_dot(y + height - 1, i);
 }
+
+
 void draw_circle(int x, int y, int radius)
 {
-    int r, c;
-    int r2 = radius * radius;
+    int row, col;
+    int distance;
 
-    for(r = y - radius; r <= y + radius; r++)
+    for(row = y - radius; row <= y + radius; row++)
     {
-        for(c = x - radius; c <= x + radius; c++)
+        for(col = x - radius; col <= x + radius; col++)
         {
-            int dx = c - x;
-            int dy = r - y;
+            distance = (row - y) * (row - y) +
+                       (col - x) * (col - x);
 
-            if(dx * dx + dy * dy <= r2)
+            if(distance >= radius * radius - 2 &&
+               distance <= radius * radius + 2)
             {
-                put_dot(r, c);
+                put_dot(row, col);
             }
         }
     }
@@ -150,156 +163,295 @@ void redraw_shapes(void)
 
     for(i = 0; i < total; i++)
     {
-        if(shapes[i].alive == 1)
+        if(shapes[i].alive == 0)
         {
-            if(shapes[i].type == RECTANGLE)
-            {
-                draw_rectangle(
-                    shapes[i].x,
-                    shapes[i].y,
-                    shapes[i].a,
-                    shapes[i].b
-                );
-            }
-
-            else if(shapes[i].type == LINE)
-            {
-                draw_line(
-                    shapes[i].x,
-                    shapes[i].y,
-                    shapes[i].a,
-                    shapes[i].b
-                );
-            }
-
-            else if(shapes[i].type == CIRCLE)
-            {
-                draw_circle(
-                    shapes[i].x,
-                    shapes[i].y,
-                    shapes[i].a
-                );
-            }
-
-            else if(shapes[i].type == TRIANGLE)
-            {
-                draw_triangle(
-                    shapes[i].x,
-                    shapes[i].y,
-                    shapes[i].a
-                );
-            }
+            continue;
+        }
+        else if(shapes[i].type == RECTANGLE)
+        {
+            draw_rectangle(
+                shapes[i].x,
+                shapes[i].y,
+                shapes[i].a,
+                shapes[i].b
+            );
+        }
+        else if(shapes[i].type == LINE)
+        {
+            draw_line(
+                shapes[i].x,
+                shapes[i].y,
+                shapes[i].a,
+                shapes[i].b
+            );
+        }
+        else if(shapes[i].type == CIRCLE)
+        {
+            draw_circle(
+                shapes[i].x,
+                shapes[i].y,
+                shapes[i].a
+            );
+        }
+        else if(shapes[i].type == TRIANGLE)
+        {
+            draw_triangle(
+                shapes[i].x,
+                shapes[i].y,
+                shapes[i].a
+            );
         }
     }
 }
 void delete_shape(int id)
 {
+    int index;
+
+    for(index = 0; index < total; index++)
+    {
+        if(shapes[index].id == id)
+        {
+            shapes[index].alive = 0;
+
+            printf("Shape deleted.\n");
+            return;
+        }
+    }
+
+    printf("Shape ID not found.\n");
+}
+void delete_shape_menu(void)
+{
+    int id;
+
+    printf("Enter shape ID to delete: ");
+    scanf("%d", &id);
+
+    delete_shape(id);
+
+    clear_canvas();
+    redraw_shapes();
+}
+
+void list_shapes(void)
+{
     int i;
+
+    printf("\n========== SHAPE LIST ==========\n");
 
     for(i = 0; i < total; i++)
     {
-        if(shapes[i].id == id)
+        printf("ID : %d\n", shapes[i].id);
+
+        if(shapes[i].type == RECTANGLE)
         {
-            shapes[i].alive = 0;
-            break;
+            printf("Type : Rectangle\n");
         }
+        else if(shapes[i].type == LINE)
+        {
+            printf("Type : Line\n");
+        }
+        else if(shapes[i].type == CIRCLE)
+        {
+            printf("Type : Circle\n");
+        }
+        else if(shapes[i].type == TRIANGLE)
+        {
+            printf("Type : Triangle\n");
+        }
+
+        if(shapes[i].alive == 1)
+        {
+            printf("Status : Active\n");
+        }
+        else
+        {
+            printf("Status : Deleted\n");
+        }
+
+        printf("-------------------------\n");
     }
+}
+
+
+void show_menu(void)
+{
+    printf("\n============================\n");
+    printf("      SHAPE EDITOR MENU\n");
+    printf("============================\n");
+    printf("1 -> Rectangle\n");
+    printf("2 -> Line\n");
+    printf("3 -> Circle\n");
+    printf("4 -> Triangle\n");
+    printf("5 -> Delete\n");
+    printf("6 -> Shape List\n");
+    printf("7 -> Canvas View\n");
+    printf("8 -> Quit\n");
+}
+
+void add_rectangle(void)
+{
+    int x, y, width, height;
+
+    printf("Enter x: ");
+    scanf("%d", &x);
+
+    printf("Enter y: ");
+    scanf("%d", &y);
+
+    printf("Enter width: ");
+    scanf("%d", &width);
+
+    printf("Enter height: ");
+    scanf("%d", &height);
+
+    shapes[total].id = next_id++;
+    shapes[total].type = RECTANGLE;
+    shapes[total].alive = 1;
+    shapes[total].x = x;
+    shapes[total].y = y;
+    shapes[total].a = width;
+    shapes[total].b = height;
+
+    total++;
+
+    clear_canvas();
+    redraw_shapes();
+}
+
+void add_line(void)
+{
+    int x1, y1, x2, y2;
+
+    printf("Enter x1: ");
+    scanf("%d", &x1);
+
+    printf("Enter y1: ");
+    scanf("%d", &y1);
+
+    printf("Enter x2: ");
+    scanf("%d", &x2);
+
+    printf("Enter y2: ");
+    scanf("%d", &y2);
+
+    shapes[total].id = next_id++;
+    shapes[total].type = LINE;
+    shapes[total].alive = 1;
+    shapes[total].x = x1;
+    shapes[total].y = y1;
+    shapes[total].a = x2;
+    shapes[total].b = y2;
+
+    total++;
+
+    clear_canvas();
+    redraw_shapes();
+}
+
+void add_circle(void)
+{
+    int x, y, radius;
+
+    printf("Enter center x: ");
+    scanf("%d", &x);
+
+    printf("Enter center y: ");
+    scanf("%d", &y);
+
+    printf("Enter radius: ");
+    scanf("%d", &radius);
+
+    shapes[total].id = next_id++;
+    shapes[total].type = CIRCLE;
+    shapes[total].alive = 1;
+    shapes[total].x = x;
+    shapes[total].y = y;
+    shapes[total].a = radius;
+
+    total++;
+
+    clear_canvas();
+    redraw_shapes();
+}
+
+void add_triangle(void)
+{
+    int x, y, height;
+
+    printf("Enter apex x: ");
+    scanf("%d", &x);
+
+    printf("Enter apex y: ");
+    scanf("%d", &y);
+
+    printf("Enter height: ");
+    scanf("%d", &height);
+
+    shapes[total].id = next_id++;
+    shapes[total].type = TRIANGLE;
+    shapes[total].alive = 1;
+    shapes[total].x = x;
+    shapes[total].y = y;
+    shapes[total].a = height;
+
+    total++;
+
+    clear_canvas();
+    redraw_shapes();
 }
 int main(void)
 {
-    clear_canvas();
-    draw_rectangle(10,5,20,8);
-    draw_line(5, 15, 25, 15);
-    draw_triangle(55, 8, 6);
-    draw_circle(25, 18, 5);
-    
-shapes[0].type = RECTANGLE;
-shapes[0].alive = 0;
-shapes[0].x = 10;
-shapes[0].y = 5;
-shapes[0].a = 20;
-shapes[0].b = 8;
-
-shapes[1].type = LINE;
-shapes[1].alive = 1;
-shapes[1].x = 5;
-shapes[1].y = 15;
-shapes[1].a = 25;
-shapes[1].b = 15;
-
-    draw_line(5, 15, 25, 15);
-
-shapes[2].type = LINE;
-shapes[2].alive = 1;
-shapes[2].x = 40;
-shapes[2].y = 5;
-shapes[2].a = 40;
-shapes[2].b = 18;
-
-    draw_line(40,5,40,18);
-
-shapes[3].type = TRIANGLE;
-shapes[3].alive = 1;
-shapes[3].x = 55;
-shapes[3].y = 8;
-shapes[3].a = 6;
-
-    draw_triangle(55, 8, 6);
-shapes[4].type = CIRCLE;
-shapes[4].alive = 1;
-shapes[4].x = 25;
-shapes[4].y = 18;
-shapes[4].a = 5;
+    int choice;
+    int running = 1;
 
     clear_canvas();
 
-shapes[0].id=1;
-shapes[0].type = RECTANGLE;
-shapes[0].alive = 0;
-shapes[0].x = 10;
-@@ -241,6 +256,7 @@ shapes[0].a = 20;
-shapes[0].b = 8;
+    while(running)
+    {
+        show_menu();
 
+        printf("Enter choice: ");
+        scanf("%d", &choice);
 
-shapes[1].id=1+2;
-shapes[1].type = LINE;
-shapes[1].alive = 1;
-shapes[1].x = 5;
-@@ -249,6 +265,7 @@ shapes[1].a = 25;
-shapes[1].b = 15;
-
-
-shapes[2].id=3;
-shapes[2].type = LINE;
-shapes[2].alive = 1;
-shapes[2].x = 40;
-@@ -257,13 +274,15 @@ shapes[2].a = 40;
-shapes[2].b = 18;
-
-
-shapes[3].id=4;
-shapes[3].type = TRIANGLE;
-shapes[3].alive = 1;
-shapes[3].x = 55;
-shapes[3].y = 8;
-shapes[3].a = 6;
-
-shapes[4].id=5;
-shapes[4].type = CIRCLE;
-shapes[4].alive = 1;
-shapes[4].x = 25;
-@@ -280,6 +299,8 @@ total = 5;
-
-    // draw_circle(25, 18, 5);
-
-    delete_shape(5);
-
-    draw_circle(25, 18, 5);
-total = 5;
-
-
-    redraw_shapes();
-    show_canvas();
+        if(choice == 1)
+        {
+            add_rectangle();
+        }
+        else if(choice == 2)
+        {
+            add_line();
+        }
+        else if(choice == 3)
+        {
+            add_circle();
+        }
+        else if(choice == 4)
+        {
+            add_triangle();
+        }
+        else if(choice == 5)
+        {
+            delete_shape_menu();
+        }
+        else if(choice == 6)
+        {
+            list_shapes();
+        }
+        else if(choice == 7)
+        {
+            show_canvas();
+        }
+        else if(choice == 8)
+        {
+            printf("Exiting Program...\n");
+            running = 0;
+        }
+        else
+        {
+            printf("Invalid Choice.\n");
+        }
+    }
 
     return 0;
 }
