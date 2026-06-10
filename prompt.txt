@@ -1,0 +1,29 @@
+I'm building a simple terminal-based shape editor in C that lets users draw shapes on a text-based canvas and manage them. I want to write the codebase from scratch. Here is how I want it structured:
+Canvas
+   I want a 25x70 grid of characters the background should default to '_' (underscores) and drawn pixels should be '*' (asterisks) and I  need functions to clear the canvas (clear canvas) display it with a neat border around it (show canvas) and a safe  put  dot (row, col) function that ignores coordinate values outside the 25x70 boundaries
+The Data Structure
+   I want a “Shape” struct to track each shape It should have fields for “id”, “type”
+ (1 = Circle, 2 = Rectangle, 3 = Line, 4 = Triangle)
+, “alive”  (a flag to track if it's active or deleted), 
+and coordinate parameters `x, y, a, b`
+   I'll store these in a global array “shapes” with a capacity of 64, keeping track of the “total” shape count and a “next  id” variable that starts at 1.
+
+Drawing logic:
+   Rectangle: Just a hollow border using the parameters (x, y, width, height).
+   Line: Draw horizontal (“y1 == y2”) and vertical (“x1 == x2”) lines between the coordinates.
+   -Circle: Draw a hollow circle boundary using the distance formula: “(row - y)^2 + (col - x)^2” with a threshold tolerance of radius^2 ± 2
+   Triangle: Draw a hollow symmetric triangle pointing up given its apex coordinate and height
+
+The Menu Loop:
+   The program should run in a loop showing a menu with options:
+     1. Add Rectangle (ask for x, y, width, height)
+     2. Add Line (ask for x1, y1, x2, y2)
+     3. Add Circle (ask for centre  x, y, radius)
+     4. Add Triangle (ask for apex x, y, height)
+     5. Delete Shape (asks for shape ID, sets its “alive” flag to 0)
+     6. List Shapes (prints ID, type, parameters, and active/deleted status of all shapes in the array)
+     7. Canvas View (renders and shows the current canvas state)
+     8. Quit
+    Every time a shape is added or deleted, the program should clear the canvas and redraw all active (“alive == 1”) shapes in sequence
+
+Can you write the complete clean C code for this?
